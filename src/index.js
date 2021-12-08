@@ -66,13 +66,12 @@ function MeteroAuth({
       .post(tokenURL, body.toString(), {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        responseType: 'text'
+        }
       })
       .then((resp) => {
         onSuccess(prepareAuthData(resp.data))
       })
-      .catch((resp) => {
+      .catch(() => {
         onFail(new Error('Failed to fetch access token'))
       })
   }
