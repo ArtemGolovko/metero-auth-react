@@ -1,4 +1,4 @@
-# auth-react
+# metero-auth-react
 
 > Metero auth api for React JS.
 
