@@ -9,6 +9,39 @@ import jwt_decode from 'jwt-decode'
 const authorizationURL = 'https://accounts.metero.pp.ua/authorize'
 const tokenURL = 'https://accounts.metero.pp.ua/token'
 
+function CSRFError(expectedToken, actualToken) {
+  Error.call(this, expectedToken, actualToken)
+  this.name = 'CSRFError'
+
+  this.expectedToken = expectedToken
+  this.actualToken = actualToken
+  this.message = 'Invalid csrf'
+
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(this, CSRFError)
+  } else {
+    this.stack = new Error().stack
+  }
+}
+
+CSRFError.prototype = Object.create(Error.prototype)
+
+function AxiosError(message, originalError) {
+  Error.call(this, message, originalError)
+  this.name = 'AxiosError'
+
+  this.originalError = originalError
+  this.message = message
+
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(this, AxiosError)
+  } else {
+    this.stack = new Error().stack
+  }
+}
+
+AxiosError.prototype = Object.create(Error.prototype)
+
 const prepareAuthData = (rawData) => {
   const accessTokenExpiresAt = new Date()
   accessTokenExpiresAt.setSeconds(
@@ -49,7 +82,7 @@ function MeteroAuth({
 
   const onCode = (code, params) => {
     if (!params.has('state') || csrf !== params.get('state')) {
-      onFail(new Error('Invalid csrf'))
+      onFail(new CSRFError(csrf, params.get('state')))
       return
     }
 
@@ -71,8 +104,8 @@ function MeteroAuth({
       .then((resp) => {
         onSuccess(prepareAuthData(resp.data))
       })
-      .catch(() => {
-        onFail(new Error('Failed to fetch access token'))
+      .catch((error) => {
+        onFail(new AxiosError('Failed to fetch access token', error))
       })
   }
 
@@ -132,8 +165,8 @@ function refreshAuth({ refreshToken, clientId, clientSecret, scope }) {
       .then((resp) => {
         resolve(prepareAuthData(resp.data))
       })
-      .catch((resp) => {
-        reject(new Error('Failed to refresh auth'))
+      .catch((error) => {
+        reject(new AxiosError('Failed to refresh auth', error))
       })
   })
 }
