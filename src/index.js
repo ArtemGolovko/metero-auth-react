@@ -1,10 +1,11 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import * as crypto from 'crypto'
-import pkceChallenge from 'pkce-challenge'
+import pkceChallenge from './pkce-challenge'
 import OauthPopup from 'react-oauth-popup'
 import axios from 'axios'
 import jwt_decode from 'jwt-decode'
+
+const crypto = require('crypto-browserify')
 
 const authorizationURL = 'https://accounts.metero.pp.ua/authorize'
 const tokenURL = 'https://accounts.metero.pp.ua/token'
